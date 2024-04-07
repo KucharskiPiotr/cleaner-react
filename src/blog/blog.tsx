@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {ButtonHTMLAttributes, InputHTMLAttributes, useEffect, useState} from "react";
 import {Post} from "./types.tsx";
 import {RestPostRepository} from "./repositories.tsx";
 
@@ -16,42 +16,44 @@ function usePosts(query: string, repository: PostRepository): Array<Post> | null
   return posts ? posts.filter(post => query === '' || post.title.includes(query)) : []
 }
 
-interface SearchProps {
+interface SearchProps extends InputHTMLAttributes<HTMLInputElement> {
   setSearchQuery: (query: string) => void
 }
 
-function Search({setSearchQuery}: SearchProps) {
+function Search({setSearchQuery, ...inputProps}: SearchProps) {
   return (
     <input
       type="text"
       style={{ marginBottom: 20 }}
       onChange={e => setSearchQuery(e.target.value)}
       placeholder="Search..."
+      {...inputProps}
     />
   )
 }
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   noun: string
 }
 
-function Button({noun}: ButtonProps) {
+function Button({noun, ...buttonProps }: ButtonProps) {
   return (
-    <button style={{ marginBottom: 20 }}>
+    <button style={{ marginBottom: 20 }} {...buttonProps} >
       Visit {noun}
     </button>
   )
 }
 
 interface PostProps {
-  post: Post
+  title: string,
+  body: string
 }
 
-function PostView({post}: PostProps) {
+function PostView({title, body}: PostProps) {
   return (
     <div style={{ border: 'solid 2px', marginBottom: 50 }}>
-      <h2>{post.title}</h2>
-      <p>{post.body}</p>
+      <h2>{title}</h2>
+      <p>{body}</p>
       <Button noun={'it'} />
     </div>
   )
@@ -60,7 +62,7 @@ function PostView({post}: PostProps) {
 function PostList({posts}: {posts: Array<Post>}) {
   return (
     <div>
-      {posts.map(post => <PostView key={post.id} post={post} />)}
+      {posts.map(post => <PostView key={post.id} title={post.title} body={post.body} />)}
       {posts.length === 0 && <p>No posts found</p>}
     </div>
   )
