@@ -1,14 +1,17 @@
 import {useEffect, useState} from "react";
 import {Post} from "./types.tsx";
+import {RestPostRepository} from "./repositories.tsx";
 
-function usePosts(query: string): Array<Post> | null {
+export interface PostRepository {
+  fetchPosts(): Promise<Array<Post>>
+}
+
+function usePosts(query: string, repository: PostRepository): Array<Post> | null {
   const [posts, setPosts] = useState<Array<Post> | null>(null)
 
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/posts')
-      .then(response => response.json())
-      .then(json => setPosts(json))
-  }, [])
+    repository.fetchPosts().then(posts => setPosts(posts))
+  }, [repository])
 
   return posts ? posts.filter(post => query === '' || post.title.includes(query)) : []
 }
@@ -34,7 +37,7 @@ interface ButtonProps {
 
 function Button({noun}: ButtonProps) {
   return (
-    <button>
+    <button style={{ marginBottom: 20 }}>
       Visit {noun}
     </button>
   )
@@ -57,15 +60,19 @@ function PostView({post}: PostProps) {
 function PostList({posts}: {posts: Array<Post>}) {
   return (
     <div>
-      {posts.map(post => <PostView post={post} />)}
+      {posts.map(post => <PostView key={post.id} post={post} />)}
       {posts.length === 0 && <p>No posts found</p>}
     </div>
   )
 }
 
-export default function Blog() {
+interface BlogProps {
+  repository?: PostRepository
+}
+
+export default function Blog({repository = new RestPostRepository()}: BlogProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const posts = usePosts(searchQuery)
+  const posts = usePosts(searchQuery, repository)
 
   if (posts === null) {
     return <p>Loading...</p>
