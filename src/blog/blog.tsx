@@ -1,6 +1,5 @@
 import {ButtonHTMLAttributes, InputHTMLAttributes, useEffect, useState} from "react";
 import {Post} from "./types.tsx";
-import {RestPostRepository} from "./repositories.tsx";
 
 export interface PostRepository {
   fetchPosts(): Promise<Array<Post>>
@@ -69,10 +68,10 @@ function PostList({posts}: {posts: Array<Post>}) {
 }
 
 interface BlogProps {
-  repository?: PostRepository
+  repository: PostRepository
 }
 
-export default function Blog({repository = new RestPostRepository()}: BlogProps) {
+export default function Blog({repository}: BlogProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const posts = usePosts(searchQuery, repository)
 
